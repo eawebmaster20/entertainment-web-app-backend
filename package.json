@@ -1,0 +1,34 @@
+{
+  "name": "entertainmentbackend",
+  "version": "1.0.0",
+  "description": "A light weight server to implement jwt based authentication using passport",
+  "start": "nodemon server.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git remote add origin https://github.com/eawebmaster20/entertainment-web-app-backend.git"
+  },
+  "keywords": [
+    "sqlite",
+    "express",
+    "nodejs",
+    "passport"
+  ],
+  "author": "eawebmaster20",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.6.3",
+    "nodemon": "^3.1.7",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "sqlite3": "^5.1.7"
+  }
+}
