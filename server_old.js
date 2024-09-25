@@ -4,45 +4,24 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
-const cors = require('cors');
-const path = require('path');
+const cors= require('cors');
+const path = require('path'); 
 const fs = require('fs'); 
-const swaggerJsdoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
 
 dotenv.config();
 
 const app = express();
 app.use(bodyParser.json());
+
 app.use(cors());
 
-
-const swaggerOptions = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'My API',
-      version: '1.0.0',
-      description: 'API for user authentication and movies endpoint',
-    },
-    servers: [
-      {
-        url: 'https://entertainment-web-app-backend-2.onrender.com', 
-      },
-    ],
-  },
-  apis: ['./server.js'], 
-};
-
-const swaggerDocs = swaggerJsdoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-
-
+// Initialize SQLite database (it will create `auth.db` if it doesn't exist)
 const db = new sqlite3.Database('./auth.db', (err) => {
   if (err) {
     console.error('Error opening database:', err.message);
   } else {
     console.log('Connected to SQLite database.');
+    // Create users table if it doesn't exist
     db.run(
       `CREATE TABLE IF NOT EXISTS users (
          id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,38 +37,10 @@ const db = new sqlite3.Database('./auth.db', (err) => {
   }
 });
 
-/**
- * @swagger
- * components:
- *   securitySchemes:
- *     BearerAuth:
- *       type: http
- *       scheme: bearer
- * 
- * /api/register:
- *   post:
- *     summary: Register a new user
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *               password:
- *                 type: string
- *     responses:
- *       201:
- *         description: User registered successfully
- *       400:
- *         description: User already exists
- *       500:
- *         description: Server error
- */
+// Register user
 app.post('/api/register', (req, res) => {
   const { username, password } = req.body;
+    console.log(req.body);
   db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, row) => {
     if (err) {
       return res.status(500).json({ error: 'Server error' });
@@ -98,6 +49,7 @@ app.post('/api/register', (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+    // Hash password and insert user
     const hashedPassword = bcrypt.hashSync(password, 10);
     db.run(`INSERT INTO users (username, password) VALUES (?, ?)`, [username, hashedPassword], (err) => {
       if (err) {
@@ -108,32 +60,11 @@ app.post('/api/register', (req, res) => {
   });
 });
 
-/**
- * @swagger
- * /api/login:
- *   post:
- *     summary: Login a user
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *               password:
- *                 type: string
- *     responses:
- *       200:
- *         description: Token generated
- *       400:
- *         description: Invalid credentials
- *       500:
- *         description: Server error
- */
+// Login user
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
+
+  console.log(req.body);
   db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, user) => {
     if (err) {
       return res.status(500).json({ error: 'Server error' });
@@ -152,22 +83,8 @@ app.post('/api/login', (req, res) => {
   });
 });
 
-/**
- * @swagger
- * /api/movies:
- *   get:
- *     summary: Get a movie list (protected route)
- *     security:
- *       - BearerAuth: []
- *     responses:
- *       200:
- *         description: A movie list
- *       403:
- *         description: No token provided
- *       500:
- *         description: Server error
- */
 app.get('/api/movies', (req, res) => {
+    console.log(req.body);
   const token = req.headers['authorization'];
   if (!token) {
     return res.status(403).json({ message: 'No token provided' });
@@ -182,20 +99,22 @@ app.get('/api/movies', (req, res) => {
         return res.status(404).json({ message: 'User not found' });
       }
       const filePath = path.join(__dirname, 'data.json');
-      res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Transfer-Encoding', 'chunked');
 
-      const readStream = fs.createReadStream(filePath, { encoding: 'utf8' });
-      readStream.pipe(res);
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Transfer-Encoding', 'chunked');  
 
-      readStream.on('error', (err) => {
-        console.error('Error reading the file:', err);
-        res.status(500).send('Server error occurred');
-      });
+        const readStream = fs.createReadStream(filePath, { encoding: 'utf8' });
 
-      readStream.on('end', () => {
-        res.end();
-      });
+        readStream.pipe(res);
+
+        readStream.on('error', (err) => {
+            console.error('Error reading the file:', err);
+            res.status(500).send('Server error occurred');
+        });
+
+        readStream.on('end', () => {
+            res.end();
+        });
     });
   });
 });
