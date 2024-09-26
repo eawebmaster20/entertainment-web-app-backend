@@ -184,14 +184,14 @@ app.post('/api/login', (req, res) => {
  */
 app.get('/api/movies', (req, res) => {
   const token = req.headers['authorization'];
-  if (!token) {
-    return res.status(403).json({ message: 'No token provided' });
-  }
+  // if (!token) {
+  //   return res.status(403).json({ message: 'No token provided' });
+  // }
 
-  jwt.verify(token.split(' ')[1], process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(500).json({ message: 'Failed to authenticate token' });
-    }
+  // jwt.verify(token.split(' ')[1], process.env.JWT_SECRET, (err, decoded) => {
+  //   if (err) {
+  //     return res.status(500).json({ message: 'Failed to authenticate token' });
+  //   }
     db.get(`SELECT id, username FROM users WHERE id = ?`, [decoded.id], (err, user) => {
       if (err || !user) {
         return res.status(404).json({ message: 'User not found' });
@@ -212,7 +212,7 @@ app.get('/api/movies', (req, res) => {
         res.end();
       });
     });
-  });
+  // });
 });
 
 
