@@ -29,7 +29,24 @@ const swaggerOptions = {
       {
         url: 'https://entertainment-web-app-backend-2.onrender.com', 
       },
+      {
+        url: 'http://localhost:5000',
+      },
     ],
+    components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+        },
+      },
+      security: [
+        {
+          bearerAuth: [],
+        },
+      ],
   },
   apis: ['./server.js'], 
 };
@@ -153,19 +170,17 @@ app.post('/api/login', (req, res) => {
 });
 
 /**
- * @swagger
+@swagger
  * /api/movies:
  *   get:
- *     summary: Get a movie list (protected route)
+ *     summary: Get movies data (requires JWT token)
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: A movie list
+ *         description: Returns the movies data
  *       403:
- *         description: No token provided
- *       500:
- *         description: Server error
+ *         description: Unauthorized
  */
 app.get('/api/movies', (req, res) => {
   const token = req.headers['authorization'];
