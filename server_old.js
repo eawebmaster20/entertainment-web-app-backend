@@ -15,14 +15,12 @@ app.use(bodyParser.json());
 
 app.use(cors());
 
-// Initialize SQLite database (it will create `auth.db` if it doesn't exist)
 const db = new sqlite3.Database('./auth.db', (err) => {
   if (err) {
     console.error('Error opening database:', err.message);
   } else {
     console.log('Connected to SQLite database.');
-    // Create users table if it doesn't exist
-    db.run(
+   db.run(
       `CREATE TABLE IF NOT EXISTS users (
          id INTEGER PRIMARY KEY AUTOINCREMENT,
          username TEXT UNIQUE,
@@ -37,7 +35,6 @@ const db = new sqlite3.Database('./auth.db', (err) => {
   }
 });
 
-// Register user
 app.post('/api/register', (req, res) => {
   const { username, password } = req.body;
     console.log(req.body);
@@ -49,7 +46,6 @@ app.post('/api/register', (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Hash password and insert user
     const hashedPassword = bcrypt.hashSync(password, 10);
     db.run(`INSERT INTO users (username, password) VALUES (?, ?)`, [username, hashedPassword], (err) => {
       if (err) {
@@ -60,7 +56,6 @@ app.post('/api/register', (req, res) => {
   });
 });
 
-// Login user
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
 
