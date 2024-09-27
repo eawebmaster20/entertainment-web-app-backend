@@ -183,35 +183,23 @@ app.post('/api/login', (req, res) => {
  *         description: Unauthorized
  */
 app.get('/api/movies', (req, res) => {
-  const token = req.headers['authorization'];
-  // if (!token) {
-  //   return res.status(403).json({ message: 'No token provided' });
-  // }
+  const filePath = path.join(__dirname, 'data.json');
 
-  // jwt.verify(token.split(' ')[1], process.env.JWT_SECRET, (err, decoded) => {
-  //   if (err) {
-  //     return res.status(500).json({ message: 'Failed to authenticate token' });
-  //   }
-    db.get(`SELECT id, username FROM users WHERE id = ?`, [decoded.id], (err, user) => {
-      if (err || !user) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-      const filePath = path.join(__dirname, 'data.json');
-      res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Transfer-Encoding', 'chunked');
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Transfer-Encoding', 'chunked');  
 
-      const readStream = fs.createReadStream(filePath, { encoding: 'utf8' });
-      readStream.pipe(res);
+        const readStream = fs.createReadStream(filePath, { encoding: 'utf8' });
 
-      readStream.on('error', (err) => {
-        console.error('Error reading the file:', err);
-        res.status(500).send('Server error occurred');
-      });
+        readStream.pipe(res);
 
-      readStream.on('end', () => {
-        res.end();
-      });
-    });
+        readStream.on('error', (err) => {
+            console.error('Error reading the file:', err);
+            res.status(500).send('Server error occurred');
+        });
+
+        readStream.on('end', () => {
+            res.end();
+        });
   // });
 });
 
