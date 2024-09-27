@@ -63,7 +63,7 @@ const db = new sqlite3.Database('./auth.db', (err) => {
     db.run(
       `CREATE TABLE IF NOT EXISTS users (
          id INTEGER PRIMARY KEY AUTOINCREMENT,
-         username TEXT UNIQUE,
+         email TEXT UNIQUE,
          password TEXT
        )`,
       (err) => {
@@ -93,7 +93,7 @@ const db = new sqlite3.Database('./auth.db', (err) => {
  *           schema:
  *             type: object
  *             properties:
- *               username:
+ *               email:
  *                 type: string
  *               password:
  *                 type: string
@@ -106,8 +106,8 @@ const db = new sqlite3.Database('./auth.db', (err) => {
  *         description: Server error
  */
 app.post('/api/register', (req, res) => {
-  const { username, password } = req.body;
-  db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, row) => {
+  const { email, password } = req.body;
+  db.get(`SELECT * FROM users WHERE email = ?`, [email], (err, row) => {
     if (err) {
       return res.status(500).json({ error: 'Server error' });
     }
@@ -116,7 +116,7 @@ app.post('/api/register', (req, res) => {
     }
 
     const hashedPassword = bcrypt.hashSync(password, 10);
-    db.run(`INSERT INTO users (username, password) VALUES (?, ?)`, [username, hashedPassword], (err) => {
+    db.run(`INSERT INTO users (email, password) VALUES (?, ?)`, [email, hashedPassword], (err) => {
       if (err) {
         return res.status(500).json({ error: 'Failed to register user' });
       }
@@ -137,7 +137,7 @@ app.post('/api/register', (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               username:
+ *               email:
  *                 type: string
  *               password:
  *                 type: string
@@ -150,8 +150,8 @@ app.post('/api/register', (req, res) => {
  *         description: Server error
  */
 app.post('/api/login', (req, res) => {
-  const { username, password } = req.body;
-  db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, user) => {
+  const { email, password } = req.body;
+  db.get(`SELECT * FROM users WHERE email = ?`, [email], (err, user) => {
     if (err) {
       return res.status(500).json({ error: 'Server error' });
     }
@@ -164,7 +164,7 @@ app.post('/api/login', (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ token });
   });
 });
