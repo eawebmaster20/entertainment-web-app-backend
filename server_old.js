@@ -7,12 +7,13 @@ const dotenv = require('dotenv');
 const cors= require('cors');
 const path = require('path'); 
 const fs = require('fs'); 
+const helmet = require('helmet');
 
 dotenv.config();
 
 const app = express();
 app.use(bodyParser.json());
-
+app.use(helmet());
 app.use(cors());
 
 const db = new sqlite3.Database('./auth.db', (err) => {
